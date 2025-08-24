@@ -21,7 +21,14 @@ function init() {
                 'CREATE TABLE IF NOT EXISTS todo_items (id varchar(36), name varchar(255), completed boolean)',
                 (err, result) => {
                     if (err) return rej(err);
-                    acc();
+                    // Ensure users table exists
+                    db.run(
+                        'CREATE TABLE IF NOT EXISTS users (id varchar(36), email varchar(255) UNIQUE, password varchar(255))',
+                        (err2) => {
+                            if (err2) return rej(err2);
+                            acc();
+                        },
+                    );
                 },
             );
         });
@@ -110,4 +117,33 @@ module.exports = {
     storeItem,
     updateItem,
     removeItem,
+    // user methods
+    async storeUser(user) {
+        return new Promise((acc, rej) => {
+            db.run(
+                'INSERT INTO users (id, email, password) VALUES (?, ?, ?) ',
+                [user.id, user.email, user.password],
+                (err) => {
+                    if (err) return rej(err);
+                    acc();
+                },
+            );
+        });
+    },
+    async getUser(id) {
+        return new Promise((acc, rej) => {
+            db.all('SELECT * FROM users WHERE id=?', [id], (err, rows) => {
+                if (err) return rej(err);
+                acc(rows[0]);
+            });
+        });
+    },
+    async getUserByEmail(email) {
+        return new Promise((acc, rej) => {
+            db.all('SELECT * FROM users WHERE email=?', [email], (err, rows) => {
+                if (err) return rej(err);
+                acc(rows[0]);
+            });
+        });
+    },
 };

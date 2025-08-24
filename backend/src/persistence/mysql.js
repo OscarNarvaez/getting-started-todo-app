@@ -43,8 +43,16 @@ async function init() {
             (err) => {
                 if (err) return rej(err);
 
-                console.log(`Connected to mysql db at host ${HOST}`);
-                acc();
+                // ensure users table exists
+                pool.query(
+                    'CREATE TABLE IF NOT EXISTS users (id varchar(36), email varchar(255) UNIQUE, password varchar(255)) DEFAULT CHARSET utf8mb4',
+                    (err2) => {
+                        if (err2) return rej(err2);
+
+                        console.log(`Connected to mysql db at host ${HOST}`);
+                        acc();
+                    },
+                );
             },
         );
     });
@@ -132,4 +140,33 @@ module.exports = {
     storeItem,
     updateItem,
     removeItem,
+    // user methods
+    async storeUser(user) {
+        return new Promise((acc, rej) => {
+            pool.query(
+                'INSERT INTO users (id, email, password) VALUES (?, ?, ?)',
+                [user.id, user.email, user.password],
+                (err) => {
+                    if (err) return rej(err);
+                    acc();
+                },
+            );
+        });
+    },
+    async getUser(id) {
+        return new Promise((acc, rej) => {
+            pool.query('SELECT * FROM users WHERE id=?', [id], (err, rows) => {
+                if (err) return rej(err);
+                acc(rows[0]);
+            });
+        });
+    },
+    async getUserByEmail(email) {
+        return new Promise((acc, rej) => {
+            pool.query('SELECT * FROM users WHERE email=?', [email], (err, rows) => {
+                if (err) return rej(err);
+                acc(rows[0]);
+            });
+        });
+    },
 };

@@ -6,6 +6,8 @@ const getItems = require('./routes/getItems');
 const addItem = require('./routes/addItem');
 const updateItem = require('./routes/updateItem');
 const deleteItem = require('./routes/deleteItem');
+const addUser = require('./routes/addUser');
+const getUser = require('./routes/getUser');
 
 app.use(express.json());
 app.use(express.static(__dirname + '/static'));
@@ -15,6 +17,8 @@ app.get('/api/items', getItems);
 app.post('/api/items', addItem);
 app.put('/api/items/:id', updateItem);
 app.delete('/api/items/:id', deleteItem);
+app.post('/api/users', addUser);
+app.get('/api/users/:id', getUser);
 
 db.init()
     .then(() => {
@@ -27,7 +31,7 @@ db.init()
 
 const gracefulShutdown = () => {
     db.teardown()
-        .catch(() => {})
+        .catch(() => { })
         .then(() => process.exit());
 };
 
